@@ -1,7 +1,7 @@
 import React from 'react'
 import { BaseCenterView } from './base-views'
 import { Text, Button, View } from 'react-native'
-import { Options } from '../icons/Options'
+import { Setting } from '../icons/Setting'
 
 export function notificationList({navigation}) {
     return (
@@ -12,7 +12,7 @@ export function notificationList({navigation}) {
                     navigation.navigate('Setting')
                 }}
             >
-                <Options size={24} fill='rgb(0, 0, 0)' />
+                <Setting size={24} fill='rgb(0, 0, 0)' />
                 {/* <Button
                     title="设置"
                     onPress={() => {

@@ -1,7 +1,7 @@
 import React from 'react'
 import Svg, { Path } from 'react-native-svg'
 
-export const Options = ({
+export const Setting = ({
   size = 30,
   fill = 'rgb(255, 255, 255)',
 }) => {
