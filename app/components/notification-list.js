@@ -1,46 +1,52 @@
 import React, { useState, useEffect } from 'react'
 import { BaseCenterView } from './base-views'
 import { Text, View, StyleSheet, FlatList, Dimensions } from 'react-native'
-import RobotWebSocket from '../libs/websoket'
+import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
 let socketInstance = null
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [linking, setLinking] = useState(true)
     
-    function notifyCallBack (){
-        Store.getInstance().loadSetting().then(res=> {
-            socketInstance = RobotWebSocket.getInstance(res.shopId)
-            socketInstance.instance.onmessage = (e) => {
+    function notifyCallBack (onMount = false) {
+        socketInstance && socketInstance.close()//close old connect at first
+        RobotWebSocket().then((res)=> {
+            socketInstance = res
+            res.onmessage = (e) => {
                 const data = JSON.parse(e.data)
-                socketInstance.notifyInstance.localNotif(data.message || '')
+                res.notifyInstance.localNotif(data.message || '')
                 setList(oldList => [data, ...oldList])
             }
+
+            setLinking(false)
+            // get history list
+            onMount && Store.getInstance().loadRecords().then(res=> {
+                setList(res)
+                setTimeout(()=> { setLoading(false) }, 2000)
+            }).catch(()=> {
+                setList([])
+                setTimeout(()=> { setLoading(false) }, 2000)
+            })
         })
     }
 
     //re-create websocket instance
     useEffect(() => {
         if(route.params && route.params.doupdate) {
-            // RobotWebSocket.getInstance.instance.close()
             notifyCallBack()
         }
     })
 
     useEffect(() => {
-        notifyCallBack()
-        //get history list
-        Store.getInstance().loadRecords().then(res=> {
-            setList(res)
-            setLoading(false)
-        }).catch(()=> { setList([]) })
+        notifyCallBack(true)
     }, [])
 
     useEffect(() => {
         list.length > 0
-            && Store.getInstance().saveRecords(list)//add cache
+            && Store.getInstance().saveRecords(list)//add into cache
     }, [list])
 
     function ListItem ({item}) {
@@ -51,14 +57,22 @@ export function notificationList({navigation, route}) {
                     messageTime: item.messageTime
                 }) 
             }}>
-                <Text style={{flex: 1,color: '#666'}}>{item.message.substr(0, 40) + '...'}</Text>
+                <Text style={{flex: 1,color: '#666'}}>{
+                    item.message.length >= 50 ?
+                        item.message.substr(0, 50) + '...'
+                        : item.message
+                }</Text>
                 <Text style={{flex: 1,textAlign: 'right',color: '#ccc',fontSize: 10}}>时间：{item.messageTime}</Text>
             </View>
         )
     }
 
+    if(linking) {
+        return <SplashScreen message="正在创建连接……" />
+    }
+
     if(loading) {
-        return <SplashScreen />
+        return <SplashScreen message="历史数据加载中……" />
     }
 
     return (
@@ -68,6 +82,7 @@ export function notificationList({navigation, route}) {
                     data={list}
                     renderItem={ListItem}
                     initialNumToRender={10}
+                    keyExtractor={(item) => item.messageTime}
                 />
             </View>
         </BaseCenterView>
@@ -78,7 +93,7 @@ const styles = StyleSheet.create({
     list: {
         flex: 1,
         width: Dimensions.get('window').width - 30,
-        marginTop: 40,
+        marginTop: 20,
         marginLeft: 8
     },
     listitem: {
