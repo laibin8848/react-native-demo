@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { BaseCenterView } from './base-views'
-import { Text, View, StyleSheet, FlatList, Dimensions } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Dimensions, Alert } from 'react-native'
 import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
@@ -11,7 +11,8 @@ export function notificationList({navigation, route}) {
     const [loading, setLoading] = useState(true)
     const [linking, setLinking] = useState(true)
     
-    function notifyCallBack (onMount = false) {
+    function createWSLink (onMount = false) {
+        setLinking(true)
         socketInstance && socketInstance.close()//close old connect at first
         RobotWebSocket().then((res)=> {
             socketInstance = res
@@ -30,18 +31,20 @@ export function notificationList({navigation, route}) {
                 setList([])
                 setTimeout(()=> { setLoading(false) }, 2000)
             })
+        }).catch(res=> {
+            Alert.alert(res)
         })
     }
 
     //re-create websocket instance
     useEffect(() => {
         if(route.params && route.params.doupdate) {
-            notifyCallBack()
+            !linking && createWSLink()
         }
-    })
+    }, [route])
 
     useEffect(() => {
-        notifyCallBack(true)
+        createWSLink(true)
     }, [])
 
     useEffect(() => {

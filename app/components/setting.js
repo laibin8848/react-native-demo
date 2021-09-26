@@ -49,9 +49,7 @@ const Setting = ({navigation}) => {
                             Alert.alert('请输入编号！')
                             return
                         }
-                        
                         Store.getInstance().saveSetting({shopId: shopId}).then(()=> {
-                            //re-create websocket
                             navigation.navigate('Home', { doupdate: true })
                         })
                     }}
