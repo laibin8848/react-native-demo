@@ -1,47 +1,47 @@
-import PushNotification from 'react-native-push-notification';
+import PushNotification from 'react-native-push-notification'
 
 class NotificationHandler {
   onNotification(notification) {
-    console.log('NotificationHandler:', notification);
+    console.log('NotificationHandler:', notification)
 
     if (typeof this._onNotification === 'function') {
-      this._onNotification(notification);
+      this._onNotification(notification)
     }
   }
 
   onRegister(token) {
-    console.log('NotificationHandler:', token);
+    console.log('NotificationHandler:', token)
 
     if (typeof this._onRegister === 'function') {
-      this._onRegister(token);
+      this._onRegister(token)
     }
   }
 
   onAction(notification) {
-    console.log ('Notification action received:');
-    console.log(notification.action);
-    console.log(notification);
+    console.log ('Notification action received:')
+    console.log(notification.action)
+    console.log(notification)
 
     if(notification.action === 'Yes') {
-      PushNotification.invokeApp(notification);
+      PushNotification.invokeApp(notification)
     }
   }
 
   // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
   onRegistrationError(err) {
-    console.log(err);
+    console.log(err)
   }
   
   attachRegister(handler) {
-    this._onRegister = handler;
+    this._onRegister = handler
   }
 
   attachNotification(handler) {
-    this._onNotification = handler;
+    this._onNotification = handler
   }
 }
 
-const handler = new NotificationHandler();
+const handler = new NotificationHandler()
 
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
@@ -73,6 +73,6 @@ PushNotification.configure({
    * - if not, you must call PushNotificationsHandler.requestPermissions() later
    */
    requestPermissions: Platform.OS === 'ios',
-});
+})
 
-export default handler;
+export default handler

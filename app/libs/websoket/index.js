@@ -1,36 +1,34 @@
 import NotifService from '../notification/NotifService'
 import { Platform, Alert } from 'react-native'
 
-export default class CreateWS {
-  static instance = null
-  static notifyInstance = null
-  static shopId = 1111
+export default class RobotWebSocket {
 
-  constructor() {
-    if(!this.notifyInstance) {
-      this.notifyInstance = new NotifService(()=> {}, (notif)=> {
-          Alert.alert(notif.title, notif.message)
-      })
-    }
-    if(!this.instance) {
-      console.log('create sw')
-      this.instance = new WebSocket(`ws://172.20.39.139:8080/haidilao/webSocket/${this.shopId}/${Platform.constants.Serial}`)
+  constructor(shopId) {
+    this.notifyInstance = new NotifService(()=> {}, (notif)=> {
+        // Alert.alert(notif.title, notif.message)
+    })
 
-      this.instance.onopen = () => {
-        this.instance.send(`连接创建，门店编号：${this.shopId}，客户端ID：${Platform.constants.Serial}`)
-      }
-      
-      this.instance.onmessage = (e) => {
-        this.notifyInstance.localNotif(e.data)
-      }
-      
-      this.instance.onerror = (e) => {
-        console.log(e.message)
-      }
-      
-      this.instance.onclose = (e) => {
-        console.log(e.code, e.reason)
-      }
+    const wsUrl = `ws://10.16.153.37:30084/haidilao/webSocket/${shopId}/${Platform.constants.Serial}`
+    const wsInstance = new WebSocket(`ws://10.16.153.37:30084/haidilao/webSocket/${shopId}/${Platform.constants.Serial}`)
+    console.log('websocket is : ' + wsUrl, wsInstance)
+    wsInstance.onopen = () => {
+      this.instance.send(`连接创建，门店编号：${shopId}，客户端ID：${Platform.constants.Serial}`)
     }
+    wsInstance.onerror = (e) => {
+      console.log(e.message)
+    }
+    wsInstance.onclose = (e) => {
+      console.log(e.code, e.reason)
+    }
+    this.instance = wsInstance
+  }
+
+  static getInstance(shopId) {
+    // if(!this.instance) {
+      this.instance = new RobotWebSocket(shopId)
+      return this.instance
+    // } else {
+    //   return this.instance
+    // }
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 
 export function BaseCenterView ({children}) {
   return (
@@ -9,10 +9,11 @@ export function BaseCenterView ({children}) {
   )
 }
 
-export function SplashScreen () {
+export function SplashScreen ({message}) {
   return (
     <BaseCenterView>
-      <Text>加载中...</Text>
+      <ActivityIndicator animating={true} color="red" size="large" />
+      <Text>{message || '加载中...'}</Text>
     </BaseCenterView>
   )
 }

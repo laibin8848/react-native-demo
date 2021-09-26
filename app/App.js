@@ -3,34 +3,46 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack'
 import Setting from './components/setting'
 import notificationList from './components/notification-list'
+import notificationDetail from './components/notification-detail'
 import { SplashScreen } from './components/base-views'
-import CreateWS from './libs/websoket'
-
-//create websocket client
-new CreateWS()
+import Store from './store'
+import { Button, View } from 'react-native'
 
 const MainStack = createStackNavigator()
-function MainStackScreen() {
+function MainStackScreen({defaultScreen}) {
   return (
     <MainStack.Navigator
-      headerMode="none"
-      initialRouteName="Home"
+      initialRouteName={defaultScreen}
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}>
-      <MainStack.Screen name="Home" component={notificationList} />
-      <MainStack.Screen name="Setting" component={Setting} />
+      <MainStack.Screen
+        options={({navigation}) => ({
+          headerTitle: "首页",
+          headerRight: () => (
+            <View style={{marginRight: 10}}>
+              <Button onPress={ ()=> { navigation.navigate('Setting') } } title="设置" />
+            </View>
+          )
+        })}
+        name="Home" component={notificationList} />
+      <MainStack.Screen options={{headerTitle: "设置"}} name="Setting" component={Setting} />
+      <MainStack.Screen options={{headerTitle: "详情"}} name="Detail" component={notificationDetail} />
     </MainStack.Navigator>
   )
 }
 
 export default () => {
   const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => {
+  const [screen, setScreen] = useState('Setting')
+  
+  useEffect(()=> {
+    Store.getInstance().loadSetting().then(res=> {
+      setScreen('Home')
       setIsLoading(false)
-    }, 1000)
+    }).catch(err=> {
+      setIsLoading(false)
+    })
   }, [])
 
   if (isLoading) {
@@ -38,7 +50,7 @@ export default () => {
   }
   return (
     <NavigationContainer>
-      <MainStackScreen />
+      <MainStackScreen defaultScreen={screen}/>
     </NavigationContainer>
   )
 }
