@@ -22,9 +22,9 @@ const Setting = ({navigation}) => {
     }
 
     return (
-        <BaseCenterView>
+        <View style={{display: 'flex',alignItems: 'center',marginTop: 40}}>
             <View>
-                <Image source={logo} style={{marginBottom: 20}} />
+                <Image source={logo} style={{marginBottom: 20, width: 166,height: 166}} />
             </View>
             <View style={styles.lineView}>
                 <Text style={{textAlign: 'center'}}>机器人手环通讯系统</Text>
@@ -59,7 +59,7 @@ const Setting = ({navigation}) => {
                     }}
                 />
             </View>
-        </BaseCenterView>
+        </View>
     )
 }
 

@@ -23,10 +23,10 @@ function MainStackScreen({defaultScreen}) {
           headerStyle: {
             backgroundColor: '#DF9F3F',
           },
-          title: "当日通知",
+          title: "消息列表",
           headerRight: () => (
             <TouchableOpacity style={{marginRight: 10}} onPress={ ()=> { navigation.navigate('Setting') } }>
-              <SettingIcon />
+              <SettingIcon size={22} />
             </TouchableOpacity>
           )
         })}
@@ -44,7 +44,7 @@ function MainStackScreen({defaultScreen}) {
         headerStyle: {
           backgroundColor: '#DF9F3F',
         },
-        title: "通知详情"
+        title: "消息详情"
       }} name="Detail" component={notificationDetail} />
     </MainStack.Navigator>
   )

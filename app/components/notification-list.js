@@ -13,10 +13,11 @@ export function notificationList({navigation, route}) {
     const [linking, setLinking] = useState(true)
 
     function keepAlive () {
+        keepAliveTimer && clearInterval(keepAliveTimer)
         keepAliveTimer = setInterval(()=> {
             socketInstance && socketInstance.send('hi')
-            fetch('http://172.20.39.143:8000/json')
-        }, 50000)
+            // fetch('http://172.20.39.143:8000/json')
+        }, 30000)
     }
     
     function createWSLink (onMount = false) {
