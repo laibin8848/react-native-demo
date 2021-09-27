@@ -6,7 +6,7 @@ export function notificationDetail({navigation, route}) {
     return (
         <View style={styles.detailview}>
             <Text style={{padding: 20,color: '#666'}}>{route.params.message}</Text>
-            <Text style={{padding: 20,color: '#ccc',fontSize: 10,textAlign: 'right'}}>时间：{route.params.messageTime}</Text>
+            <Text style={{padding: 20,color: '#ccc',fontSize: 10,textAlign: 'right'}}>接收时间：{route.params.messageTime}</Text>
         </View>
     )
 }

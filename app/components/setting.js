@@ -27,9 +27,12 @@ const Setting = ({navigation}) => {
                 <Image source={logo} style={{marginBottom: 20}} />
             </View>
             <View style={styles.lineView}>
+                <Text style={{textAlign: 'center'}}>机器人手环通讯系统</Text>
+            </View>
+            <View style={styles.lineView}>
                 <TextInput
                     style={{ height: 50, borderColor: '#ccc', borderWidth: 1, borderRadius: 4 }}
-                    placeholder="请输入设备编号"
+                    placeholder="请输入门店码"
                     onChangeText={text => setShopId(text)}
                     value={shopId}
                 />
@@ -43,6 +46,7 @@ const Setting = ({navigation}) => {
             </View> */}
             <View style={styles.lineView}>
                 <Button
+                    color="#DF9F3F"
                     title="创建连接"
                     onPress={() => {
                         if(!shopId) {

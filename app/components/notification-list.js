@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { BaseCenterView } from './base-views'
-import { Text, View, StyleSheet, FlatList, Dimensions, Alert } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Dimensions, Alert, TouchableOpacity } from 'react-native'
 import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
@@ -70,7 +70,7 @@ export function notificationList({navigation, route}) {
 
     function ListItem ({item}) {
         return (
-            <View style={styles.listitem} onPress={() => {
+            <TouchableOpacity style={styles.listitem} onPress={() => {
                 navigation.navigate('Detail', {
                     message: item.message,
                     messageTime: item.messageTime
@@ -81,8 +81,8 @@ export function notificationList({navigation, route}) {
                         item.message.substr(0, 50) + '...'
                         : item.message
                 }</Text>
-                <Text style={{flex: 1,textAlign: 'right',color: '#ccc',fontSize: 10,marginTop: 6}}>时间：{item.messageTime}</Text>
-            </View>
+                <Text style={{flex: 1,textAlign: 'right',color: '#ccc',fontSize: 10,marginTop: 6}}>接收时间：{item.messageTime}</Text>
+            </TouchableOpacity>
         )
     }
 

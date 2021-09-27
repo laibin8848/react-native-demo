@@ -6,7 +6,7 @@ import notificationList from './components/notification-list'
 import notificationDetail from './components/notification-detail'
 import { SplashScreen } from './components/base-views'
 import Store from './store'
-import { Button, View } from 'react-native'
+import { TouchableOpacity, StatusBar } from 'react-native'
 import { SettingIcon } from './icons/Setting'
 
 const MainStack = createStackNavigator()
@@ -23,28 +23,28 @@ function MainStackScreen({defaultScreen}) {
           headerStyle: {
             backgroundColor: '#DF9F3F',
           },
-          title: "首页",
+          title: "当日通知",
           headerRight: () => (
-            <View style={{marginRight: 10}} onPress={ ()=> { navigation.navigate('Setting') } }>
+            <TouchableOpacity style={{marginRight: 10}} onPress={ ()=> { navigation.navigate('Setting') } }>
               <SettingIcon />
-              {/* <Button onPress={ ()=> { navigation.navigate('Setting') } } title="设置" /> */}
-            </View>
+            </TouchableOpacity>
           )
         })}
         name="Home" component={notificationList} />
       <MainStack.Screen options={{
         headerTintColor: '#fff',
         headerStyle: {
+          textAlign: 'center',
           backgroundColor: '#DF9F3F',
         },
-        title: "设置"
+        title: "门店码设置"
       }} name="Setting" component={Setting} />
       <MainStack.Screen options={{
         headerTintColor: '#fff',
         headerStyle: {
           backgroundColor: '#DF9F3F',
         },
-        title: "详情"
+        title: "通知详情"
       }} name="Detail" component={notificationDetail} />
     </MainStack.Navigator>
   )
@@ -55,6 +55,8 @@ export default () => {
   const [screen, setScreen] = useState('Setting')
   
   useEffect(()=> {
+    StatusBar.setBackgroundColor('#DF9F3F')
+
     Store.getInstance().loadSetting().then(res=> {
       setScreen('Home')
       setIsLoading(false)
