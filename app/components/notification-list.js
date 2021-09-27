@@ -5,21 +5,33 @@ import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
 let socketInstance = null
+let keepAliveTimer = null
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
     const [loading, setLoading] = useState(true)
     const [linking, setLinking] = useState(true)
+
+    function keepAlive () {
+        keepAliveTimer = setInterval(()=> {
+            socketInstance && socketInstance.send('hi')
+            fetch('http://172.20.39.143:8000/json')
+        }, 50000)
+    }
     
     function createWSLink (onMount = false) {
         setLinking(true)
         socketInstance && socketInstance.close()//close old connect at first
         RobotWebSocket().then((res)=> {
             socketInstance = res
+            keepAlive()
             res.onmessage = (e) => {
                 const data = JSON.parse(e.data)
-                res.notifyInstance.localNotif(data.message || '')
-                setList(oldList => [data, ...oldList])
+                console.log('data', data)
+                if(data.messageType) {
+                    res.notifyInstance.localNotif(data.message || '')
+                    setList(oldList => [data, ...oldList])
+                }
             }
 
             setLinking(false)
@@ -45,6 +57,10 @@ export function notificationList({navigation, route}) {
 
     useEffect(() => {
         createWSLink(true)
+
+        return () => {
+            clearInterval(keepAliveTimer)
+        }
     }, [])
 
     useEffect(() => {
@@ -54,7 +70,7 @@ export function notificationList({navigation, route}) {
 
     function ListItem ({item}) {
         return (
-            <View style={styles.listitem} onTouchEnd={() => {
+            <View style={styles.listitem} onPress={() => {
                 navigation.navigate('Detail', {
                     message: item.message,
                     messageTime: item.messageTime
@@ -65,7 +81,7 @@ export function notificationList({navigation, route}) {
                         item.message.substr(0, 50) + '...'
                         : item.message
                 }</Text>
-                <Text style={{flex: 1,textAlign: 'right',color: '#ccc',fontSize: 10}}>时间：{item.messageTime}</Text>
+                <Text style={{flex: 1,textAlign: 'right',color: '#ccc',fontSize: 10,marginTop: 6}}>时间：{item.messageTime}</Text>
             </View>
         )
     }
@@ -81,12 +97,16 @@ export function notificationList({navigation, route}) {
     return (
         <BaseCenterView>
             <View style={styles.list}>
-                <FlatList
-                    data={list}
-                    renderItem={ListItem}
-                    initialNumToRender={10}
-                    keyExtractor={(item) => item.messageTime}
-                />
+                {
+                    list.length > 0 ?
+                    <FlatList
+                        data={list}
+                        renderItem={ListItem}
+                        initialNumToRender={10}
+                        keyExtractor={(item) => item.messageTime}
+                    /> :
+                    <View><Text style={{textAlign: 'center', color: '#999', marginTop: 20}}>暂无数据~</Text></View>
+                }
             </View>
         </BaseCenterView>
     )

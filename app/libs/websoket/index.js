@@ -31,7 +31,7 @@ export const RobotWebSocket = () => {
         console.log(`socket num: ${shopId}  close`, e.code, e.reason)
       }
       
-      setTimeout(()=> { reslove(wsInstance) }, 1000)
+      setTimeout(()=> { reslove(wsInstance) }, 2000)
     })
   })
 }

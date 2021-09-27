@@ -7,6 +7,7 @@ import notificationDetail from './components/notification-detail'
 import { SplashScreen } from './components/base-views'
 import Store from './store'
 import { Button, View } from 'react-native'
+import { SettingIcon } from './icons/Setting'
 
 const MainStack = createStackNavigator()
 function MainStackScreen({defaultScreen}) {
@@ -18,16 +19,33 @@ function MainStackScreen({defaultScreen}) {
       }}>
       <MainStack.Screen
         options={({navigation}) => ({
-          headerTitle: "首页",
+          headerTintColor: '#fff',
+          headerStyle: {
+            backgroundColor: '#DF9F3F',
+          },
+          title: "首页",
           headerRight: () => (
-            <View style={{marginRight: 10}}>
-              <Button onPress={ ()=> { navigation.navigate('Setting') } } title="设置" />
+            <View style={{marginRight: 10}} onPress={ ()=> { navigation.navigate('Setting') } }>
+              <SettingIcon />
+              {/* <Button onPress={ ()=> { navigation.navigate('Setting') } } title="设置" /> */}
             </View>
           )
         })}
         name="Home" component={notificationList} />
-      <MainStack.Screen options={{headerTitle: "设置"}} name="Setting" component={Setting} />
-      <MainStack.Screen options={{headerTitle: "详情"}} name="Detail" component={notificationDetail} />
+      <MainStack.Screen options={{
+        headerTintColor: '#fff',
+        headerStyle: {
+          backgroundColor: '#DF9F3F',
+        },
+        title: "设置"
+      }} name="Setting" component={Setting} />
+      <MainStack.Screen options={{
+        headerTintColor: '#fff',
+        headerStyle: {
+          backgroundColor: '#DF9F3F',
+        },
+        title: "详情"
+      }} name="Detail" component={notificationDetail} />
     </MainStack.Navigator>
   )
 }
