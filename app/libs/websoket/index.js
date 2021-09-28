@@ -8,8 +8,8 @@ export const RobotWebSocket = () => {
   return new Promise((reslove, reject) => {
     Store.getInstance().loadSetting().then(res => {
       const shopId = res.shopId || ''
-      
-      const wsUrl = `ws://open-api-test.gdiiyy.com/haidilao/webSocket/${shopId}/${Platform.constants.Serial}/${md5(getCurDate())}`
+      //Platform.constants.Serial
+      const wsUrl = `ws://open-api-test.gdiiyy.com/haidilao/webSocket/${shopId}/${Math.random()}/${md5(getCurDate())}`
       const wsInstance = new WebSocket(wsUrl)
 
       wsInstance.notifyInstance = new NotifService(()=> {}, (notif)=> {
@@ -19,7 +19,7 @@ export const RobotWebSocket = () => {
       console.log('websocket is connect: ' + wsUrl)
   
       wsInstance.onopen = () => {
-        wsInstance.send(`连接创建，门店编号：${shopId}，客户端ID：${Platform.constants.Serial}`)
+        wsInstance.send(`连接创建，门店编号：${shopId}，客户端ID：${Math.random()}`)
       }
       wsInstance.onerror = (e) => {
         showLogToServer('websocket onerror')
@@ -30,7 +30,6 @@ export const RobotWebSocket = () => {
       }
       wsInstance.onclose = (e) => {
         showLogToServer('websocket onclose')
-        wsInstance.reconnect()
         reject('连接失败，请首先检查您的手机是否联网')
         console.log(`socket num: ${shopId}  close`, e.code, e.reason)
       }
