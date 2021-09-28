@@ -16,7 +16,7 @@ export function notificationList({navigation, route}) {
         keepAliveTimer && clearInterval(keepAliveTimer)
         keepAliveTimer = setInterval(()=> {
             socketInstance && socketInstance.send('hi')
-            // fetch('http://172.20.39.143:8000/json')
+            fetch('http://172.20.39.143:8000/json')
         }, 30000)
     }
     
