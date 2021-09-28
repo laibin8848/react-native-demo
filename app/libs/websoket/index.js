@@ -22,12 +22,12 @@ export const RobotWebSocket = () => {
         wsInstance.send(`连接创建，门店编号：${shopId}，客户端ID：${Platform.constants.Serial}`)
       }
       wsInstance.onerror = (e) => {
-        reject('连接失败')
+        reject('连接失败，请首先检查您的手机是否联网')
         console.log(`socket num: ${shopId}  error`, e.message)
         // this.getInstance(shopId)
       }
       wsInstance.onclose = (e) => {
-        reject('连接失败')
+        reject('连接失败，请首先检查您的手机是否联网')
         console.log(`socket num: ${shopId}  close`, e.code, e.reason)
       }
       

@@ -4,20 +4,33 @@ import { Text, View, StyleSheet, FlatList, Dimensions, Alert, TouchableOpacity }
 import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
+import BackgroundJob from 'react-native-background-job'
 let socketInstance = null
 let keepAliveTimer = null
+const backgroundJobKey = 'BackgroundJob'
+BackgroundJob.register({
+    jobKey: backgroundJobKey,
+    job: () => {
+        socketInstance && socketInstance.send('hi')
+    }
+})
+BackgroundJob.schedule({
+    jobKey: backgroundJobKey,
+    period: 16000,
+    exact: true
+}).then(()=> { console.log('BackgroundJob start') })
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
     const [loading, setLoading] = useState(true)
     const [linking, setLinking] = useState(true)
 
+    //use FE BE way to keep websocket alive
     function keepAlive () {
         keepAliveTimer && clearInterval(keepAliveTimer)
         keepAliveTimer = setInterval(()=> {
             socketInstance && socketInstance.send('hi')
-            fetch('http://172.20.39.143:8000/json')
-        }, 30000)
+        }, 16000)
     }
     
     function createWSLink (onMount = false) {
