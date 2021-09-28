@@ -5,20 +5,10 @@ import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
 import BackgroundJob from 'react-native-background-job'
+import { showLogToServer } from '../libs/util'
 let socketInstance = null
 let keepAliveTimer = null
 const backgroundJobKey = 'BackgroundJob'
-BackgroundJob.register({
-    jobKey: backgroundJobKey,
-    job: () => {
-        socketInstance && socketInstance.send('hi')
-    }
-})
-BackgroundJob.schedule({
-    jobKey: backgroundJobKey,
-    period: 16000,
-    exact: true
-}).then(()=> { console.log('BackgroundJob start') })
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
@@ -29,13 +19,39 @@ export function notificationList({navigation, route}) {
     function keepAlive () {
         keepAliveTimer && clearInterval(keepAliveTimer)
         keepAliveTimer = setInterval(()=> {
+            showLogToServer('timer')
             socketInstance && socketInstance.send('hi')
         }, 16000)
+
+        try {
+            function backgroundJobFun () {
+                try{
+                    socketInstance && socketInstance.send('hi')
+                    showLogToServer('backendjob')
+                } catch(e) {
+                    //
+                }
+            }
+            BackgroundJob.register({
+                jobKey: backgroundJobKey,
+                job: backgroundJobFun
+            })
+            BackgroundJob.schedule({
+                jobKey: backgroundJobKey,
+                period: 16000,
+                allowWhileIdle: true,
+                exact: true
+            }).then(()=> { 
+                console.log('BackgroundJob start')
+            })
+        } catch(err) {
+            console.log('BackgroundJob start err')
+        }
     }
     
     function createWSLink (onMount = false) {
         setLinking(true)
-        socketInstance && socketInstance.close()//close old connect at first
+        // socketInstance && socketInstance.close()//close old connect at first
         RobotWebSocket().then((res)=> {
             socketInstance = res
             keepAlive()

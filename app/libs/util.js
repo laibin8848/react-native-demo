@@ -5,3 +5,7 @@ export const getCurDate = () => {
     const day = date.getDate()
     return `${year}-${month < 10 ? `0${month}` : month}-${day}`
 }
+
+export const showLogToServer = (msg) => {
+    fetch(`http://172.20.39.143:8000/json?${msg}`)
+}

@@ -218,6 +218,8 @@ dependencies {
     }
     // implementation 'com.google.firebase:firebase-analytics:17.3.0'
     implementation project(':react-native-push-notification')
+
+    compile project(':react-native-background-job')
 }
 // apply plugin: 'com.google.gms.google-services'
 
