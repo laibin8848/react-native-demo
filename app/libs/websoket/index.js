@@ -30,6 +30,7 @@ export const RobotWebSocket = () => {
       }
       wsInstance.onclose = (e) => {
         showLogToServer('websocket onclose')
+        wsInstance.reconnect()
         reject('连接失败，请首先检查您的手机是否联网')
         console.log(`socket num: ${shopId}  close`, e.code, e.reason)
       }
