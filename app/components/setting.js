@@ -3,7 +3,7 @@ import { BaseCenterView } from './base-views'
 import { Text, Button, TextInput, View, StyleSheet, Switch, Alert, Image } from 'react-native'
 import Store from '../store'
 import logo from '../assets/logo.png'
-import { SplashScreen } from './base-views'
+// import { SplashScreen } from './base-views'
 
 const Setting = ({navigation}) => {
     const [shopId, setShopId] = useState('')
