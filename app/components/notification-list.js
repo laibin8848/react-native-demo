@@ -51,7 +51,7 @@ export function notificationList({navigation, route}) {
     
     function createWSLink (onMount = false) {
         setLinking(true)
-        // socketInstance && socketInstance.close()//close old connect at first
+        socketInstance && socketInstance.close()//close old connect at first
         RobotWebSocket().then((res)=> {
             socketInstance = res
             keepAlive()

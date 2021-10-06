@@ -2,7 +2,7 @@ import NotifService from '../notification/NotifService'
 import { Platform, Alert } from 'react-native'
 import Store from '../../store'
 import md5 from 'js-md5'
-import { getCurDate } from '../util'
+import { getCurDate, showLogToServer } from '../util'
 
 export const RobotWebSocket = () => {
   return new Promise((reslove, reject) => {
@@ -22,17 +22,14 @@ export const RobotWebSocket = () => {
         wsInstance.send(`连接创建，门店编号：${shopId}，客户端ID：${Math.random()}`)
       }
       wsInstance.onerror = (e) => {
+        console.log(`socket num: ${shopId}  error`, e.message)
         showLogToServer('websocket onerror')
         reject('连接失败，请首先检查您的手机是否联网')
-        wsInstance.reconnect()
-        console.log(`socket num: ${shopId}  error`, e.message)
-        // this.getInstance(shopId)
       }
       wsInstance.onclose = (e) => {
-        showLogToServer('websocket onclose')
-        wsInstance.reconnect()
-        reject('连接失败，请首先检查您的手机是否联网')
         console.log(`socket num: ${shopId}  close`, e.code, e.reason)
+        showLogToServer('websocket onclose')
+        reject('连接失败，请首先检查您的手机是否联网')
       }
       
       setTimeout(()=> { reslove(wsInstance) }, 2000)
