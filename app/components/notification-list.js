@@ -6,16 +6,17 @@ import { SplashScreen } from './base-views'
 import Store from '../store'
 import BackgroundJob from 'react-native-background-job'
 import { showLogToServer } from '../libs/util'
-import NetInfo from '@react-native-community/netinfo'
+import { useNetInfo } from '@react-native-community/netinfo'
+
 let socketInstance = null
 let keepAliveTimer = null
 const backgroundJobKey = 'BackgroundJob'
-let netinfoSub = null
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
     const [loading, setLoading] = useState(true)
-    const [linking, setLinking] = useState(true)
+    const [linking, setLinking] = useState(false)
+    const netInfoRef = useNetInfo()
 
     //use FE BE way to keep websocket alive
     function keepAlive () {
@@ -53,7 +54,14 @@ export function notificationList({navigation, route}) {
     
     function createWSLink (onMount = false) {
         setLinking(true)
-        socketInstance && socketInstance.close()//close old connect at first
+        if(socketInstance) {//close old connect at first
+            try{
+                socketInstance.close()
+                socketInstance = null
+            } catch(e) {
+                //
+            }
+        }
         RobotWebSocket().then((res)=> {
             socketInstance = res
             keepAlive()
@@ -62,28 +70,25 @@ export function notificationList({navigation, route}) {
                 console.log('onmessage', data)
                 if(data.messageType) {
                     res.notifyInstance.localNotif(data.message || '')
-                    setList(oldList => [data, ...oldList])
+                    setList(oldList => {
+                        console.log('old', oldList)
+                        return [data, ...oldList]
+                    })
                 }
             }
-
-            setLinking(false)
             // get history list
             onMount && Store.getInstance().loadRecords().then(res=> {
                 setList(res)
-                setTimeout(()=> { setLoading(false) }, 2000)
             }).catch(()=> {
                 setList([])
+            }).finally(()=> {
                 setTimeout(()=> { setLoading(false) }, 2000)
             })
         }).catch(res=> {
             Alert.alert(res)
+        }).finally(()=> {
+            setLinking(false)
         })
-    }
-
-    function handleNetWorkChange ({isConnected}) {
-        if(isConnected && (socketInstance && socketInstance.readyState != 1)) {
-            createWSLink()
-        }
     }
 
     //re-create websocket instance
@@ -94,14 +99,8 @@ export function notificationList({navigation, route}) {
     }, [route])
 
     useEffect(() => {
-        createWSLink(true)
-
-        //sub network change
-        netinfoSub = NetInfo.addEventListener(handleNetWorkChange)
-
         return () => {
             clearInterval(keepAliveTimer)
-            netinfoSub && netinfoSub()
         }
     }, [])
 
@@ -109,6 +108,12 @@ export function notificationList({navigation, route}) {
         list.length > 0
             && Store.getInstance().saveRecords(list)//add into cache
     }, [list])
+
+    useEffect(()=> {
+        if(netInfoRef.isConnected === true) {
+            !linking && createWSLink(true)
+        }
+    }, [netInfoRef])
 
     function ListItem ({item}) {
         return (

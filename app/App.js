@@ -50,6 +50,13 @@ function MainStackScreen({defaultScreen}) {
   )
 }
 
+function handleNetWorkChange ({isConnected}) {
+    console.log(`net ${isConnected}`)
+    if(isConnected) {
+    } else {
+    }
+}
+
 export default () => {
   StatusBar.setBackgroundColor('#DF9F3F')
 
