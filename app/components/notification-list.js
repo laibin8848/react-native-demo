@@ -6,9 +6,11 @@ import { SplashScreen } from './base-views'
 import Store from '../store'
 import BackgroundJob from 'react-native-background-job'
 import { showLogToServer } from '../libs/util'
+import NetInfo from '@react-native-community/netinfo'
 let socketInstance = null
 let keepAliveTimer = null
 const backgroundJobKey = 'BackgroundJob'
+let netinfoSub = null
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
@@ -57,7 +59,7 @@ export function notificationList({navigation, route}) {
             keepAlive()
             res.onmessage = (e) => {
                 const data = JSON.parse(e.data)
-                console.log('data', data)
+                console.log('onmessage', data)
                 if(data.messageType) {
                     res.notifyInstance.localNotif(data.message || '')
                     setList(oldList => [data, ...oldList])
@@ -78,6 +80,12 @@ export function notificationList({navigation, route}) {
         })
     }
 
+    function handleNetWorkChange ({isConnected}) {
+        if(isConnected && (socketInstance && socketInstance.readyState != 1)) {
+            createWSLink()
+        }
+    }
+
     //re-create websocket instance
     useEffect(() => {
         if(route.params && route.params.doupdate) {
@@ -88,8 +96,12 @@ export function notificationList({navigation, route}) {
     useEffect(() => {
         createWSLink(true)
 
+        //sub network change
+        netinfoSub = NetInfo.addEventListener(handleNetWorkChange)
+
         return () => {
             clearInterval(keepAliveTimer)
+            netinfoSub && netinfoSub()
         }
     }, [])
 

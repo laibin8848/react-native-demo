@@ -51,12 +51,12 @@ function MainStackScreen({defaultScreen}) {
 }
 
 export default () => {
+  StatusBar.setBackgroundColor('#DF9F3F')
+
   const [isLoading, setIsLoading] = useState(true)
   const [screen, setScreen] = useState('Setting')
   
   useEffect(()=> {
-    StatusBar.setBackgroundColor('#DF9F3F')
-
     Store.getInstance().loadSetting().then(res=> {
       setScreen('Home')
       setIsLoading(false)

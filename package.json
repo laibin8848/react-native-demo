@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
+    "@react-native-community/netinfo": "^6.0.2",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/stack": "^6.0.7",
     "js-md5": "^0.7.3",
