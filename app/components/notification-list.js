@@ -9,15 +9,17 @@ let socketInstance = null
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [linking, setLinking] = useState(false)
 
     function doSetLit(data) {
+        console.log('doSetLit cal', data)
         setList(oldList => [data, ...oldList])
     }
     
     function createWSLink (onMount = false) {
         setLinking(true)
+        setLoading(true)
         Store.getInstance().loadSetting().then(res => {
             socketInstance = RobotWebSocket.getInstance({
                 shopId: res.shopId || '',
@@ -29,17 +31,17 @@ export function notificationList({navigation, route}) {
             }).catch(()=> {
                 setList([])
             }).finally(()=> {
-                setTimeout(()=> { setLoading(false) }, 2000)
+                setTimeout(()=> { setLoading(false) }, 10000)
             })
         }).finally(()=> {
-            setLinking(false)
+            setTimeout(()=> { setLinking(false) }, 8000)
         })
     }
 
     //re-create websocket instance
     useEffect(() => {
         if(route.params && route.params.doupdate) {
-            !linking && createWSLink()
+            createWSLink(true)
         }
     }, [route])
 

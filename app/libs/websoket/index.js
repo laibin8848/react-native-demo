@@ -9,28 +9,34 @@ const maxReconnectNum = 3000
 let that = null
 let reconnectNum = 0
 let reconnectTimer = null
+let keepAliveTimer = null
 
 export default class RobotWebSocket {
 
   constructor({shopId, callBack}) {
-    console.log('constructor cal')
     this.callBack = callBack
     this.shopId = shopId
-    this.ws = this.initWs()
-    this.notifyInstance = new NotifService(()=> {}, (notif)=> {
-      //Alert.alert(notif.title, notif.message)
-    })
+    reconnectNum = 0
+    this.initWs()
+    this.notifyInstance = new NotifService(()=> {}, (notif)=> { })
     that = this
   }
 
   static getInstance({shopId, callBack}) {
-    if(this.instance && this.instance.shopId !== shopId) {
-      this.instance = new RobotWebSocket({shopId, callBack})
+    try {
+      if(this.instance && this.instance.shopId !== shopId) {
+        this.instance.ws && this.instance.ws.close()
+        clearInterval(keepAliveTimer)
+        clearInterval(reconnectTimer)
+        this.instance = new RobotWebSocket({shopId, callBack})
+      }
+      if(!this.instance) {
+        this.instance = new RobotWebSocket({shopId, callBack})
+      }
+      return this.instance
+    } catch(e) {
+      //
     }
-    if(!this.instance) {
-      this.instance = new RobotWebSocket({shopId, callBack})
-    }
-    return this.instance
   }
 
   initEvent() {
@@ -43,14 +49,14 @@ export default class RobotWebSocket {
 
     this.ws.onerror = (e) => {
       showLogToServer('websocket_onerror')
+      reconnectTimer && clearInterval(reconnectTimer)
+      reconnectTimer = setInterval(() => {
+        that.reconnect()
+      }, 30000)
     }
 
     this.ws.onclose = (e) => {
       showLogToServer('websocket_onclose')
-      reconnectTimer && clearInterval(reconnectTimer)
-      reconnectTimer = setInterval(() => {
-        that.reconnect()
-      }, 60000)
     }
 
     this.ws.onmessage = (e) => {
@@ -91,7 +97,8 @@ export default class RobotWebSocket {
   }
 
   setTimer(wsInstance) {
-    this.keepAliveTimer = setInterval(()=> {
+    keepAliveTimer && clearInterval(keepAliveTimer)
+    keepAliveTimer = setInterval(()=> {
         showLogToServer('timer')
         wsInstance && wsInstance.send('hi')
     }, 16000)
@@ -100,7 +107,6 @@ export default class RobotWebSocket {
   initWs() {
     try {
       const wsUrl = `ws://open-api-test.gdiiyy.com/haidilao/webSocket/${this.shopId}/${Math.random()}/${md5(getCurDate())}`
-      this.keepAliveTimer && clearInterval(this.keepAliveTimer)
       this.ws = new WebSocket(wsUrl)
       this.initEvent()
     } catch(e) {
