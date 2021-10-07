@@ -9,7 +9,7 @@ export const getCurDate = () => {
 export const showLogToServer = (msg) => {
     try {
         console.log(msg)
-        fetch(`http://172.20.39.143:8000/json?${msg}`)
+        // fetch(`http://172.20.39.143:8000/json?${msg}`)
     } catch(e) {
         //
     }
