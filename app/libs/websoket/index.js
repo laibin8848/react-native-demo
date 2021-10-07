@@ -43,14 +43,14 @@ export default class RobotWebSocket {
 
     this.ws.onerror = (e) => {
       showLogToServer('websocket_onerror')
-      reconnectTimer && clearInterval(reconnectTimer)
-      reconnectTimer = setInterval(() => {
-        that.reconnect()
-      }, 60000)
     }
 
     this.ws.onclose = (e) => {
       showLogToServer('websocket_onclose')
+      reconnectTimer && clearInterval(reconnectTimer)
+      reconnectTimer = setInterval(() => {
+        that.reconnect()
+      }, 60000)
     }
 
     this.ws.onmessage = (e) => {
