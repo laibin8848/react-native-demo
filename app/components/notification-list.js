@@ -74,51 +74,18 @@ export function notificationList({navigation, route}) {
         // get history list
         onMount && Store.getInstance().loadRecords().then(res=> {
             setList(res)
+            setTimeout(()=> { setLoading(false) }, 2000)
         }).catch(()=> {
             setList([])
-        }).finally(()=> {
             setTimeout(()=> { setLoading(false) }, 2000)
         })
         setLinking(false)
-        setTimeout(()=> { socketCreating = false }, 10000)
-        // setLinking(true)
-        // if(socketInstance) {//close old connect at first
-        //     try{
-        //         socketInstance.close()
-        //         // socketInstance = null
-        //     } catch(e) {
-        //         //
-        //     }
-        // }
-        // RobotWebSocket().then((res)=> {
-        //     res.onmessage = (e) => {
-        //         const data = JSON.parse(e.data)
-        //         // console.log('onmessage', data)
-        //         if(data.messageType) {
-        //             res.notifyInstance.localNotif(data.message || '')
-        //             setList(oldList => {
-        //                 return [data, ...oldList]
-        //             })
-        //         }
-        //     }
-        //     socketInstance = res
-        //     keepAlive()
-        //     // get history list
-        //     onMount && Store.getInstance().loadRecords().then(res=> {
-        //         setTimeout(()=> { setLoading(false) }, 2000)
-        //         setList(res)
-        //     }).catch(()=> {
-        //         setTimeout(()=> { setLoading(false) }, 2000)
-        //         setList([])
-        //     })
-        // }).catch(res=> {
-        //     Alert.alert(res)
-        // }).finally(()=> {
-        //     setLinking(false)
-        // })
+        socketCreating = false
+        showLogToServer(`socketCreatingdone${socketCreating}`)
     }
 
     function handleNetChange ({isConnected}) {
+        showLogToServer(`handleNetChange${socketCreating}`)
         if(socketCreating) {
             return
         }

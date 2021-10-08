@@ -21,6 +21,7 @@ export const RobotWebSocket = () => {
   
       wsInstance.onopen = () => {
         setTimeout(()=> { reslove(wsInstance) }, 2000)
+        showLogToServer('websocket onopen')
         wsInstance.send(`连接创建，门店编号：${shopId}，客户端ID：${Math.random()}`)
       }
       wsInstance.onerror = (e) => {
