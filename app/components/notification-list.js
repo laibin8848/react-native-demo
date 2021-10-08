@@ -101,7 +101,7 @@ export function notificationList({navigation, route}) {
     useEffect(() => {
         if(route.params && route.params.doupdate) {
             // showLogToServer('handleNetChange doupdate')
-            !linking && createWSLink()
+            !linking && createWSLink(true)
         }
     }, [route])
 
