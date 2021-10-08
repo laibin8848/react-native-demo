@@ -74,12 +74,11 @@ export function notificationList({navigation, route}) {
         // get history list
         onMount && Store.getInstance().loadRecords().then(res=> {
             setList(res)
-            setTimeout(()=> { setLoading(false) }, 2000)
         }).catch(()=> {
             setList([])
-            setTimeout(()=> { setLoading(false) }, 2000)
         })
         setLinking(false)
+        setLoading(false)
         socketCreating = false
         showLogToServer(`socketCreatingdone${socketCreating}`)
     }
