@@ -1,52 +1,150 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { BaseCenterView } from './base-views'
 import { Text, View, StyleSheet, FlatList, Dimensions, Alert, TouchableOpacity } from 'react-native'
-import RobotWebSocket from '../libs/websoket'
+import { RobotWebSocket } from '../libs/websoket'
 import { SplashScreen } from './base-views'
 import Store from '../store'
+import BackgroundJob from 'react-native-background-job'
+import NetInfo from '@react-native-community/netinfo'
+import { showLogToServer } from '../libs/util'
 
 let socketInstance = null
+let keepAliveTimer = null
+const backgroundJobKey = 'BackgroundJob'
+let unsubscribe = null
+let socketCreating = false
 
 export function notificationList({navigation, route}) {
     const [list, setList] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [linking, setLinking] = useState(false)
 
-    function doSetLit(data) {
-        console.log('doSetLit cal', data)
-        setList(oldList => [data, ...oldList])
+    //use FE BE way to keep websocket alive
+    function keepAlive () {
+        keepAliveTimer && clearInterval(keepAliveTimer)
+        keepAliveTimer = setInterval(()=> {
+            showLogToServer('timer')
+            socketInstance && socketInstance.send('hi')
+        }, 16000)
+
+        try {
+            function backgroundJobFun () {
+                try{
+                    socketInstance && socketInstance.send('hi')
+                    showLogToServer('backendjob')
+                } catch(e) {
+                    //
+                }
+            }
+            BackgroundJob.register({
+                jobKey: backgroundJobKey,
+                job: backgroundJobFun
+            })
+            BackgroundJob.schedule({
+                jobKey: backgroundJobKey,
+                period: 16000,
+                allowWhileIdle: true,
+                exact: true
+            }).then(()=> { 
+                console.log('BackgroundJob start')
+            })
+        } catch(err) {
+            console.log('BackgroundJob start err')
+        }
     }
     
-    function createWSLink (onMount = false) {
+    async function createWSLink (onMount = false) {
         setLinking(true)
-        setLoading(true)
-        Store.getInstance().loadSetting().then(res => {
-            socketInstance = RobotWebSocket.getInstance({
-                shopId: res.shopId || '',
-                callBack: doSetLit
-            })
-            // get history list
-            onMount && Store.getInstance().loadRecords().then(res=> {
-                setList(res)
-            }).catch(()=> {
-                setList([])
-            }).finally(()=> {
-                setTimeout(()=> { setLoading(false) }, 10000)
-            })
+        socketCreating = true
+        socketInstance && socketInstance.close()//close old connect at first
+        const socketRes = await RobotWebSocket()
+        if(socketRes instanceof WebSocket) {
+            socketRes.onmessage = (e) => {
+                const data = JSON.parse(e.data)
+                if(data.messageType) {
+                    socketRes.notifyInstance.localNotif(data.message || '')
+                    setList(oldList => {
+                        return [data, ...oldList]
+                    })
+                }
+            }
+            socketInstance = socketRes
+            keepAlive()
+        }
+        // get history list
+        onMount && Store.getInstance().loadRecords().then(res=> {
+            setList(res)
+        }).catch(()=> {
+            setList([])
         }).finally(()=> {
-            setTimeout(()=> { setLinking(false) }, 8000)
+            setTimeout(()=> { setLoading(false) }, 2000)
         })
+        setLinking(false)
+        setTimeout(()=> { socketCreating = false }, 10000)
+        // setLinking(true)
+        // if(socketInstance) {//close old connect at first
+        //     try{
+        //         socketInstance.close()
+        //         // socketInstance = null
+        //     } catch(e) {
+        //         //
+        //     }
+        // }
+        // RobotWebSocket().then((res)=> {
+        //     res.onmessage = (e) => {
+        //         const data = JSON.parse(e.data)
+        //         // console.log('onmessage', data)
+        //         if(data.messageType) {
+        //             res.notifyInstance.localNotif(data.message || '')
+        //             setList(oldList => {
+        //                 return [data, ...oldList]
+        //             })
+        //         }
+        //     }
+        //     socketInstance = res
+        //     keepAlive()
+        //     // get history list
+        //     onMount && Store.getInstance().loadRecords().then(res=> {
+        //         setTimeout(()=> { setLoading(false) }, 2000)
+        //         setList(res)
+        //     }).catch(()=> {
+        //         setTimeout(()=> { setLoading(false) }, 2000)
+        //         setList([])
+        //     })
+        // }).catch(res=> {
+        //     Alert.alert(res)
+        // }).finally(()=> {
+        //     setLinking(false)
+        // })
+    }
+
+    function handleNetChange ({isConnected}) {
+        if(socketCreating) {
+            return
+        }
+        if(isConnected === true) {
+            try{
+                createWSLink(true)
+            } catch(e) {
+                //
+            }
+        }
     }
 
     //re-create websocket instance
     useEffect(() => {
         if(route.params && route.params.doupdate) {
-            createWSLink(true)
+            // showLogToServer('handleNetChange doupdate')
+            !linking && createWSLink()
         }
     }, [route])
 
     useEffect(() => {
-        createWSLink(true)
+        !unsubscribe && (unsubscribe = NetInfo.addEventListener(handleNetChange))
+        return () => {
+            clearInterval(keepAliveTimer)
+            unsubscribe && unsubscribe()
+        }
     }, [])
 
     useEffect(() => {
